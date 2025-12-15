@@ -21,6 +21,12 @@ const defaultSettings: AppSettings = {
   password2: "456",
   startDate: new Date().toISOString().split('T')[0], // Today
   adminPassword: process.env.NEXT_PUBLIC_SETTINGS_PASSWORD || "admin123",
+  showCountdown: true,
+  showBlessing: true,
+  showMessageBoard: true,
+  showPhotoWall: true,
+  showMusicPlayer: true,
+  showMap: true,
 };
 
 export default function Home() {
@@ -80,6 +86,12 @@ export default function Home() {
             password2: data.password2_hash, // Mapping from DB column
             startDate: data.start_date,
             adminPassword: data.admin_password || process.env.NEXT_PUBLIC_SETTINGS_PASSWORD || "admin123",
+            showCountdown: data.show_countdown ?? true,
+            showBlessing: data.show_blessing ?? true,
+            showMessageBoard: data.show_message_board ?? true,
+            showPhotoWall: data.show_photo_wall ?? true,
+            showMusicPlayer: data.show_music_player ?? true,
+            showMap: data.show_map ?? true,
         });
       }
       setLoading(false);
@@ -101,7 +113,13 @@ export default function Home() {
               avatar2: newSettings.avatar2,
               password2_hash: newSettings.password2,
               start_date: newSettings.startDate,
-              admin_password: newSettings.adminPassword
+              admin_password: newSettings.adminPassword,
+              show_countdown: newSettings.showCountdown,
+              show_blessing: newSettings.showBlessing,
+              show_message_board: newSettings.showMessageBoard,
+              show_photo_wall: newSettings.showPhotoWall,
+              show_music_player: newSettings.showMusicPlayer,
+              show_map: newSettings.showMap
           }).eq('id', newSettings.id);
       } else {
           // Insert new row if no ID exists
@@ -113,7 +131,13 @@ export default function Home() {
               avatar2: newSettings.avatar2,
               password2_hash: newSettings.password2,
               start_date: newSettings.startDate,
-              admin_password: newSettings.adminPassword
+              admin_password: newSettings.adminPassword,
+              show_countdown: newSettings.showCountdown,
+              show_blessing: newSettings.showBlessing,
+              show_message_board: newSettings.showMessageBoard,
+              show_photo_wall: newSettings.showPhotoWall,
+              show_music_player: newSettings.showMusicPlayer,
+              show_map: newSettings.showMap
           }]).select().single();
 
           if (error) {
@@ -268,22 +292,22 @@ export default function Home() {
       </header>
 
       {/* Countdown */}
-      <Countdown targetDate={settings.startDate} />
+      {settings.showCountdown && <Countdown targetDate={settings.startDate} />}
 
       {/* Blessing Counter */}
-      <BlessingCounter />
+      {settings.showBlessing && <BlessingCounter />}
 
       {/* Message Board */}
-      <MessageBoard settings={settings} currentUser={currentUser} />
+      {settings.showMessageBoard && <MessageBoard settings={settings} currentUser={currentUser} />}
 
       {/* Music Player */}
-      <MusicPlayer settings={settings} currentUser={currentUser} />
+      {settings.showMusicPlayer && <MusicPlayer settings={settings} currentUser={currentUser} />}
 
       {/* China Map */}
-      <ChinaMap currentUser={currentUser} />
+      {settings.showMap && <ChinaMap currentUser={currentUser} />}
 
       {/* Photo Wall */}
-      <PhotoWall settings={settings} currentUser={currentUser} />
+      {settings.showPhotoWall && <PhotoWall settings={settings} currentUser={currentUser} />}
 
       {/* Login Modal */}
       {isLoginOpen && (

@@ -187,6 +187,34 @@ export default function SettingsModal({ isOpen, onClose, settings, onSave }: Set
                         </div>
                     </div>
 
+                    <div className="border-b-2 border-memphis-black pb-4">
+                        <h3 className="font-bold mb-2 text-memphis-yellow bg-white inline-block px-2 border-2 border-memphis-black shadow-[2px_2px_0_#232323]">模块开关 / Modules</h3>
+                        <div className="grid grid-cols-2 gap-2 mt-2">
+                            {[
+                                { key: 'showCountdown', label: '倒计时 / Countdown' },
+                                { key: 'showBlessing', label: '祝福 / Blessing' },
+                                { key: 'showMessageBoard', label: '留言板 / Messages' },
+                                { key: 'showPhotoWall', label: '照片墙 / Photos' },
+                                { key: 'showMusicPlayer', label: '音乐 / Music' },
+                                { key: 'showMap', label: '地图 / Map' },
+                            ].map(({ key, label }) => (
+                                <label key={key} className="flex items-center gap-2 cursor-pointer select-none">
+                                    <div className="relative">
+                                        <input
+                                            type="checkbox"
+                                            className="sr-only peer"
+                                            checked={!!formData[key as keyof AppSettings]}
+                                            onChange={(e) => setFormData({ ...formData, [key]: e.target.checked })}
+                                        />
+                                        <div className="w-10 h-6 bg-gray-200 border-2 border-memphis-black rounded-full peer peer-checked:bg-memphis-green peer-focus:ring-2 peer-focus:ring-memphis-black transition-all"></div>
+                                        <div className="absolute left-[4px] top-[4px] bg-white border-2 border-memphis-black w-3 h-3 rounded-full transition-all peer-checked:translate-x-4"></div>
+                                    </div>
+                                    <span className="text-sm font-bold">{label}</span>
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+
                     <div>
                         <label className="block font-bold mb-1">开始时间 / Start Date</label>
                         <input

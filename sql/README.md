@@ -28,7 +28,21 @@
 - 重置并重新应用 RLS 策略，确保 `anon` (匿名用户) 和 `authenticated` (登录用户) 都有完全访问权限。
 - 执行 `NOTIFY pgrst, 'reload schema';` 强制 PostgREST 重新加载 Schema 缓存（解决 "Could not find the table..." 错误）。
 
-### 4. `99_legacy_supabase_schema.sql` (旧版/备份)
+### 4. `03_visited_places_setup.sql` (足迹地图表)
+**用途**: 初始化足迹地图功能所需的表结构。
+**包含内容**:
+- 创建 `visited_places` 表：存储已访问的地点名称。
+- 配置 RLS 策略，允许公开读写。
+- 启用 Realtime 功能，实现多端实时同步点亮状态。
+
+### 5. `04_add_module_toggles.sql` (模块开关)
+**用途**: 为 `settings` 表添加模块显示/隐藏的控制字段。
+**包含内容**:
+- 添加 `show_countdown`, `show_blessing`, `show_message_board`, `show_photo_wall`, `show_music_player`, `show_map` 字段。
+- 默认值均为 `TRUE` (开启)。
+- 允许管理员在设置面板中动态控制各个功能模块的显示与隐藏。
+
+### 6. `99_legacy_supabase_schema.sql` (旧版/备份)
 **用途**: 项目早期的 Schema 备份文件。
 **说明**: 包含了一些早期的表定义和默认数据插入语句。主要作为参考保留，建议使用 `00_schema_setup.sql` 进行初始化。
 

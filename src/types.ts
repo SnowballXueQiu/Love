@@ -8,6 +8,14 @@ export interface AppSettings {
     password2: string;
     startDate: string; // ISO date string YYYY-MM-DD
     adminPassword?: string;
+    
+    // Module Toggles
+    showCountdown?: boolean;
+    showBlessing?: boolean;
+    showMessageBoard?: boolean;
+    showPhotoWall?: boolean;
+    showMusicPlayer?: boolean;
+    showMap?: boolean;
 }
 
 export interface Message {
