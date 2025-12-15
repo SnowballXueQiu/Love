@@ -26,11 +26,21 @@
     -   拍立得 (Polaroid) 风格的照片预览框。
     -   支持编辑和删除已发布的照片。
 
-5.  **全局设置 (Settings)**
+5.  **音乐盒 (Music Player)**
+    -   支持上传 MP3/FLAC 格式音乐。
+    -   可视化音频频谱跳动效果。
+    -   支持播放列表管理、音量调节和进度控制。
+
+6.  **足迹地图 (Footprint Map)**
+    -   交互式中国地图，点亮共同去过的省份。
+    -   孟菲斯风格配色，支持悬停查看地名。
+    -   登录后可编辑足迹，实时同步点亮状态。
+
+7.  **全局设置 (Settings)**
     -   管理员权限保护。
     -   可配置双方昵称、头像、专属密码和恋爱起始日期。
 
-6.  **实时在线状态 (Realtime Presence)**
+8.  **实时在线状态 (Realtime Presence)**
     -   当双方同时在线且聚焦页面时，显示 "👀 对方也在看" 提示。
     -   基于 Supabase Presence 实现。
 
@@ -45,9 +55,9 @@
 -   **UI 库**: [React 19](https://react.dev/)
 -   **样式**: [UnoCSS](https://unocss.dev/) (自定义 Memphis Preset)
 -   **后端服务**: [Supabase](https://supabase.com/)
-    -   **Database**: PostgreSQL (存储设置、消息、照片元数据、祝福数)
-    -   **Storage**: 存储用户头像和上传的照片
-    -   **Realtime**: 实现消息和祝福数的实时同步
+    -   **Database**: PostgreSQL (存储设置、消息、照片元数据、祝福数、歌曲列表、足迹数据)
+    -   **Storage**: 存储用户头像、上传的照片和音乐文件
+    -   **Realtime**: 实现消息、祝福数和足迹的实时同步
 -   **部署**: [Vercel](https://vercel.com/)
 
 ### 目录结构

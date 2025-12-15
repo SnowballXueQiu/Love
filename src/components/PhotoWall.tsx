@@ -294,28 +294,25 @@ export default function PhotoWall({ settings, currentUser }: PhotoWallProps) {
         <section className="memphis-card bg-memphis-orange flex flex-col gap-4">
             <div className="flex justify-between items-center border-b-3 border-memphis-black pb-2">
                 <h2 className="text-xl font-bold">照片墙 📸</h2>
-                <button 
-                    onClick={() => setIsAdding(!isAdding)} 
-                    className="memphis-btn bg-memphis-yellow text-sm py-1 px-3"
-                >
-                    {isAdding ? "取消" : "添加照片"}
-                </button>
+                {currentUser && (
+                    <button 
+                        onClick={() => setIsAdding(!isAdding)} 
+                        className="memphis-btn bg-memphis-yellow text-sm py-1 px-3"
+                    >
+                        {isAdding ? "取消" : "添加照片"}
+                    </button>
+                )}
             </div>
 
-            {isAdding && (
-                !currentUser ? (
-                    <div className="bg-white border-3 border-memphis-black p-4 shadow-[4px_4px_0_#232323] flex flex-col gap-3 items-center">
-                        <p className="font-bold">请先登录以添加照片</p>
-                    </div>
-                ) : (
-                    <div 
-                        className={`bg-white border-3 border-memphis-black p-4 shadow-[4px_4px_0_#232323] flex flex-col gap-3 transition-colors ${isDragging ? 'bg-blue-50 border-dashed' : ''}`}
-                        onDragOver={handleDragOver}
-                        onDragLeave={handleDragLeave}
-                        onDrop={handleDrop}
-                    >
-                        {isDragging && <div className="text-center font-bold text-memphis-blue pointer-events-none">释放以添加照片...</div>}
-                        <div>
+            {isAdding && currentUser && (
+                <div 
+                    className={`bg-white border-3 border-memphis-black p-4 shadow-[4px_4px_0_#232323] flex flex-col gap-3 transition-colors ${isDragging ? 'bg-blue-50 border-dashed' : ''}`}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                >
+                    {isDragging && <div className="text-center font-bold text-memphis-blue pointer-events-none">释放以添加照片...</div>}
+                    <div>
                         <label className="font-bold block mb-1">描述 (可选)</label>
                         <input 
                             type="text" 
@@ -359,7 +356,7 @@ export default function PhotoWall({ settings, currentUser }: PhotoWallProps) {
                         {uploading ? "发布中..." : "发布"}
                     </button>
                 </div>
-            ))}
+            )}
 
             <div className="flex flex-col gap-6 mt-2">
                 {posts.length === 0 ? (

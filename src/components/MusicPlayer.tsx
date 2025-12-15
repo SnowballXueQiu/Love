@@ -334,77 +334,73 @@ export default function MusicPlayer({ settings, currentUser }: MusicPlayerProps)
         <section className="memphis-card bg-memphis-blue flex flex-col gap-4">
             <div className="flex justify-between items-center border-b-3 border-memphis-black pb-2">
                 <h2 className="text-xl font-bold text-white text-shadow-sm">音乐盒 🎵</h2>
-                <button 
-                    onClick={() => setIsAdding(!isAdding)} 
-                    className="memphis-btn bg-memphis-yellow text-sm py-1 px-3"
-                >
-                    {isAdding ? "取消" : "上传"}
-                </button>
+                {currentUser && (
+                    <button 
+                        onClick={() => setIsAdding(!isAdding)} 
+                        className="memphis-btn bg-memphis-yellow text-sm py-1 px-3"
+                    >
+                        {isAdding ? "取消" : "上传"}
+                    </button>
+                )}
             </div>
 
-            {isAdding && (
-                !currentUser ? (
-                    <div className="bg-white border-3 border-memphis-black p-4 shadow-[4px_4px_0_#232323] flex flex-col gap-3 items-center">
-                        <p className="font-bold">请先登录以上传音乐</p>
-                    </div>
-                ) : (
-                    <div 
-                        className={`bg-white border-3 border-memphis-black p-4 shadow-[4px_4px_0_#232323] flex flex-col gap-3 transition-colors ${isDragging ? 'bg-blue-50 border-dashed' : ''}`}
-                        onDragOver={handleDragOver}
-                        onDragLeave={handleDragLeave}
-                        onDrop={handleDrop}
-                    >
-                        {isDragging && <div className="text-center font-bold text-memphis-blue pointer-events-none">释放以添加音乐...</div>}
-                        <div>
-                            <label className="font-bold block mb-1">文件 (MP3/WAV/FLAC)</label>
-                            <input 
-                                ref={fileInputRef}
-                                type="file" 
-                                accept="audio/*,.flac"
-                                onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) {
-                                        setUploadFile(file);
-                                        if (!uploadTitle) {
-                                            setUploadTitle(file.name.replace(/\.[^/.]+$/, ""));
-                                        }
+            {isAdding && currentUser && (
+                <div 
+                    className={`bg-white border-3 border-memphis-black p-4 shadow-[4px_4px_0_#232323] flex flex-col gap-3 transition-colors ${isDragging ? 'bg-blue-50 border-dashed' : ''}`}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                >
+                    {isDragging && <div className="text-center font-bold text-memphis-blue pointer-events-none">释放以添加音乐...</div>}
+                    <div>
+                        <label className="font-bold block mb-1">文件 (MP3/WAV/FLAC)</label>
+                        <input 
+                            ref={fileInputRef}
+                            type="file" 
+                            accept="audio/*,.flac"
+                            onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                    setUploadFile(file);
+                                    if (!uploadTitle) {
+                                        setUploadTitle(file.name.replace(/\.[^/.]+$/, ""));
                                     }
-                                }}
-                                className="memphis-input w-full text-sm mb-2"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="font-bold block mb-1">标题</label>
-                            <input 
-                                type="text" 
-                                value={uploadTitle}
-                                onChange={(e) => setUploadTitle(e.target.value)}
-                                className="memphis-input w-full"
-                                placeholder="Song Title"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="font-bold block mb-1">歌手</label>
-                            <input 
-                                type="text" 
-                                value={uploadArtist}
-                                onChange={(e) => setUploadArtist(e.target.value)}
-                                className="memphis-input w-full"
-                                placeholder="Artist Name"
-                            />
-                        </div>
-
-                        <button 
-                            onClick={handleUpload} 
-                            disabled={isUploading || !uploadFile}
-                            className="memphis-btn bg-memphis-green w-full mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {isUploading ? "上传中..." : "确认上传"}
-                        </button>
+                                }
+                            }}
+                            className="memphis-input w-full text-sm mb-2"
+                        />
                     </div>
-                )
+
+                    <div>
+                        <label className="font-bold block mb-1">标题</label>
+                        <input 
+                            type="text" 
+                            value={uploadTitle}
+                            onChange={(e) => setUploadTitle(e.target.value)}
+                            className="memphis-input w-full"
+                            placeholder="Song Title"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="font-bold block mb-1">歌手</label>
+                        <input 
+                            type="text" 
+                            value={uploadArtist}
+                            onChange={(e) => setUploadArtist(e.target.value)}
+                            className="memphis-input w-full"
+                            placeholder="Artist Name"
+                        />
+                    </div>
+
+                    <button 
+                        onClick={handleUpload} 
+                        disabled={isUploading || !uploadFile}
+                        className="memphis-btn bg-memphis-green w-full mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {isUploading ? "上传中..." : "确认上传"}
+                    </button>
+                </div>
             )}
 
             {/* Player Controls */}
