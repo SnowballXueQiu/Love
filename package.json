@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"pnpm run uno\" \"next dev\"",
+    "dev": "concurrently \"pnpm run uno\" \"node scripts/show-ip.mjs && next dev -H 0.0.0.0\"",
     "uno": "pnpm exec unocss \"src/**/*.{tsx,ts,jsx,js}\" -o src/app/uno.css --watch",
     "build": "next build",
     "start": "next start",

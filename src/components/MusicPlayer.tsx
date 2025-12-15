@@ -14,6 +14,9 @@ export default function MusicPlayer({ settings, currentUser }: MusicPlayerProps)
     const [currentSongIndex, setCurrentSongIndex] = useState<number>(-1);
     const [isPlaying, setIsPlaying] = useState(false);
     const [volume, setVolume] = useState(0.5);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
+    const [isSeeking, setIsSeeking] = useState(false);
     const audioRef = useRef<HTMLAudioElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -30,6 +33,77 @@ export default function MusicPlayer({ settings, currentUser }: MusicPlayerProps)
     // Delete confirmation state
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [songToDelete, setSongToDelete] = useState<Song | null>(null);
+
+    // Visualizer refs
+    const audioContextRef = useRef<AudioContext | null>(null);
+    const analyserRef = useRef<AnalyserNode | null>(null);
+    const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
+    const animationRef = useRef<number>(0);
+    const visualizerContainerRef = useRef<HTMLDivElement>(null);
+
+    const initAudioContext = () => {
+        if (!audioRef.current || sourceRef.current) return;
+
+        try {
+            const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+            const ctx = new AudioContext();
+            const analyser = ctx.createAnalyser();
+            analyser.fftSize = 64;
+            
+            const source = ctx.createMediaElementSource(audioRef.current);
+            source.connect(analyser);
+            analyser.connect(ctx.destination);
+
+            audioContextRef.current = ctx;
+            analyserRef.current = analyser;
+            sourceRef.current = source;
+        } catch (e) {
+            console.error("Audio Context Init Failed", e);
+        }
+    };
+
+    useEffect(() => {
+        if (isPlaying) {
+            if (!audioContextRef.current) {
+                initAudioContext();
+            }
+            if (audioContextRef.current?.state === 'suspended') {
+                audioContextRef.current.resume();
+            }
+
+            const animate = () => {
+                if (analyserRef.current && visualizerContainerRef.current) {
+                    const bufferLength = analyserRef.current.frequencyBinCount;
+                    const dataArray = new Uint8Array(bufferLength);
+                    analyserRef.current.getByteFrequencyData(dataArray);
+
+                    const bars = visualizerContainerRef.current.children;
+                    for (let i = 0; i < 12; i++) {
+                        const index = Math.floor(i * 1.5);
+                        const value = dataArray[index] || 0;
+                        const heightPercent = Math.max(20, (value / 255) * 100);
+                        
+                        const bar = bars[i] as HTMLElement;
+                        if (bar) {
+                            bar.style.height = `${heightPercent}%`;
+                        }
+                    }
+                }
+                animationRef.current = requestAnimationFrame(animate);
+            };
+            animate();
+        } else {
+            if (animationRef.current) {
+                cancelAnimationFrame(animationRef.current);
+            }
+        }
+
+        return () => {
+            if (animationRef.current) {
+                cancelAnimationFrame(animationRef.current);
+            }
+        };
+    }, [isPlaying]);
 
     useEffect(() => {
         const fetchSongs = async () => {
@@ -60,6 +134,9 @@ export default function MusicPlayer({ settings, currentUser }: MusicPlayerProps)
 
         return () => {
             supabase.removeChannel(channel);
+            if (audioContextRef.current) {
+                audioContextRef.current.close();
+            }
         };
     }, []);
 
@@ -67,7 +144,13 @@ export default function MusicPlayer({ settings, currentUser }: MusicPlayerProps)
         if (audioRef.current) {
             audioRef.current.volume = volume;
             if (isPlaying) {
-                audioRef.current.play().catch(e => console.log("Playback prevented:", e));
+                const playPromise = audioRef.current.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(e => {
+                        console.log("Playback prevented:", e);
+                        setIsPlaying(false);
+                    });
+                }
             } else {
                 audioRef.current.pause();
             }
@@ -75,6 +158,7 @@ export default function MusicPlayer({ settings, currentUser }: MusicPlayerProps)
     }, [isPlaying, volume, currentSongIndex]);
 
     const handlePlayPause = () => {
+        if (!currentSong) return;
         setIsPlaying(!isPlaying);
     };
 
@@ -217,6 +301,33 @@ export default function MusicPlayer({ settings, currentUser }: MusicPlayerProps)
         }
     };
 
+    const handleTimeUpdate = () => {
+        if (audioRef.current && !isSeeking) {
+            setCurrentTime(audioRef.current.currentTime);
+        }
+    };
+
+    const handleLoadedMetadata = () => {
+        if (audioRef.current) {
+            setDuration(audioRef.current.duration);
+        }
+    };
+
+    const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const time = parseFloat(e.target.value);
+        setCurrentTime(time);
+        if (audioRef.current) {
+            audioRef.current.currentTime = time;
+        }
+    };
+
+    const formatTime = (time: number) => {
+        if (isNaN(time)) return "0:00";
+        const minutes = Math.floor(time / 60);
+        const seconds = Math.floor(time % 60);
+        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    };
+
     const currentSong = songs[currentSongIndex];
 
     return (
@@ -304,8 +415,60 @@ export default function MusicPlayer({ settings, currentUser }: MusicPlayerProps)
                             <h3 className="font-bold text-lg truncate">{currentSong.title}</h3>
                             <p className="text-sm text-gray-500 truncate">{currentSong.artist}</p>
                         </div>
+
+                        {/* Visualizer */}
+                        <div ref={visualizerContainerRef} className="flex items-end justify-center gap-1 h-12 w-full my-2 px-4">
+                            {[...Array(12)].map((_, i) => (
+                                <div 
+                                    key={i}
+                                    className="w-2 bg-memphis-black border-2 border-black transition-all duration-75"
+                                    style={{
+                                        height: '20%',
+                                        backgroundColor: ['#ff90e8', '#23d5ab', '#ffc900'][i % 3],
+                                    }}
+                                />
+                            ))}
+                        </div>
                         
-                        <div className="flex items-center gap-4 w-full justify-center mt-2">
+                        {/* Progress Bar */}
+                        <div className="w-full flex items-center gap-2 text-xs font-mono font-bold">
+                            <span>{formatTime(currentTime)}</span>
+                            <input 
+                                type="range" 
+                                min="0" 
+                                max={duration || 100} 
+                                value={currentTime}
+                                onChange={handleSeek}
+                                onMouseDown={() => setIsSeeking(true)}
+                                onMouseUp={() => setIsSeeking(false)}
+                                className="flex-1 accent-memphis-black h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer border-2 border-memphis-black"
+                            />
+                            <span>{formatTime(duration)}</span>
+                        </div>
+
+                        <div className="flex items-center gap-4 w-full justify-center mt-2 relative">
+                            {/* Volume Control (Left side) */}
+                            <div className="absolute left-0 flex items-center gap-2 group z-10">
+                                <button className="p-2 rounded-full hover:bg-memphis-yellow border-2 border-transparent hover:border-memphis-black transition-all">
+                                    {volume === 0 ? (
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+                                    ) : (
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                                    )}
+                                </button>
+                                <div className="w-0 overflow-hidden group-hover:w-24 transition-all duration-300 flex items-center bg-white border-memphis-black group-hover:border-2 group-hover:shadow-[2px_2px_0_#232323] rounded-full h-8 opacity-0 group-hover:opacity-100">
+                                    <input 
+                                        type="range" 
+                                        min="0" 
+                                        max="1" 
+                                        step="0.05" 
+                                        value={volume}
+                                        onChange={(e) => setVolume(parseFloat(e.target.value))}
+                                        className="min-w-[80px] mx-2 accent-memphis-pink h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer border-2 border-memphis-black"
+                                    />
+                                </div>
+                            </div>
+
                             <button 
                                 onClick={handlePrev} 
                                 className="memphis-btn bg-white p-2 rounded-full hover:bg-gray-100 flex items-center justify-center w-10 h-10"
@@ -346,29 +509,13 @@ export default function MusicPlayer({ settings, currentUser }: MusicPlayerProps)
                             </button>
                         </div>
 
-                        <div className="w-full flex items-center gap-2 mt-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                            </svg>
-                            <input 
-                                type="range" 
-                                min="0" 
-                                max="1" 
-                                step="0.1" 
-                                value={volume}
-                                onChange={(e) => setVolume(parseFloat(e.target.value))}
-                                className="w-full accent-memphis-black h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer border-2 border-memphis-black"
-                            />
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-                            </svg>
-                        </div>
-
                         <audio 
                             ref={audioRef} 
                             src={currentSong.url} 
+                            crossOrigin="anonymous"
                             onEnded={handleSongEnd}
+                            onTimeUpdate={handleTimeUpdate}
+                            onLoadedMetadata={handleLoadedMetadata}
                         />
                     </>
                 ) : (
@@ -399,10 +546,13 @@ export default function MusicPlayer({ settings, currentUser }: MusicPlayerProps)
                             {currentUser && (
                                 <button 
                                     onClick={(e) => handleDeleteSong(e, song)}
-                                    className="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition"
+                                    className="text-xs bg-red-500 text-white w-6 h-6 rounded flex items-center justify-center hover:bg-red-600 transition border-2 border-memphis-black shadow-[2px_2px_0_#232323]"
                                     title="删除"
                                 >
-                                    🗑️
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
                                 </button>
                             )}
                         </div>

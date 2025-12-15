@@ -80,7 +80,7 @@ export default function MessageBoard({ settings, currentUser }: MessageBoardProp
     };
 
     return (
-        <section className="memphis-card bg-memphis-yellow flex flex-col h-[500px]">
+        <section className="memphis-card bg-memphis-yellow flex flex-col h-[60vh] max-h-[500px] w-full">
             <h2 className="text-xl font-bold border-b-3 border-memphis-black pb-2 mb-4 text-center">留言板 💌</h2>
 
             <div 
@@ -111,7 +111,7 @@ export default function MessageBoard({ settings, currentUser }: MessageBoardProp
                                             <span className="font-bold">{senderName}</span>
                                             <span>{new Date(msg.date).toLocaleString()}</span>
                                         </div>
-                                        <p className="text-sm md:text-base break-words">{msg.text}</p>
+                                        <p className="text-sm md:text-base break-all whitespace-pre-wrap">{msg.text}</p>
                                     </div>
                                 </div>
                             </div>
@@ -132,9 +132,9 @@ export default function MessageBoard({ settings, currentUser }: MessageBoardProp
                         onChange={(e) => setNewMessage(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                         placeholder={`作为 ${currentUser === 'name1' ? settings.name1 : settings.name2} 发言...`}
-                        className="memphis-input flex-1"
+                        className="memphis-input flex-1 min-w-0"
                     />
-                    <button onClick={handleSendMessage} className="memphis-btn bg-memphis-white">
+                    <button onClick={handleSendMessage} className="memphis-btn bg-memphis-white px-4 whitespace-nowrap shrink-0">
                         发送
                     </button>
                 </div>
