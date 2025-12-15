@@ -112,7 +112,7 @@ export default function SettingsModal({ isOpen, onClose, settings, onSave }: Set
                             <div>
                                 <label className="block text-sm font-bold mb-1">密码 / Password</label>
                                 <input
-                                    type="text"
+                                    type="password"
                                     className="memphis-input w-full"
                                     value={formData.password1}
                                     onChange={(e) => setFormData({ ...formData, password1: e.target.value })}
@@ -161,7 +161,7 @@ export default function SettingsModal({ isOpen, onClose, settings, onSave }: Set
                             <div>
                                 <label className="block text-sm font-bold mb-1">密码 / Password</label>
                                 <input
-                                    type="text"
+                                    type="password"
                                     className="memphis-input w-full"
                                     value={formData.password2}
                                     onChange={(e) => setFormData({ ...formData, password2: e.target.value })}
