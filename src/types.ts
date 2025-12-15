@@ -24,3 +24,12 @@ export interface PhotoPost {
     date: string;
     uploader?: string; // 'name1' or 'name2'
 }
+
+export interface Song {
+    id: string;
+    title: string;
+    artist: string;
+    url: string;
+    uploader?: string;
+    created_at: string;
+}

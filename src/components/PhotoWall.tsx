@@ -31,6 +31,9 @@ export default function PhotoWall({ settings, currentUser }: PhotoWallProps) {
     const [editNewFiles, setEditNewFiles] = useState<File[]>([]);
     const [editNewPreviews, setEditNewPreviews] = useState<string[]>([]);
 
+    // Drag and drop state
+    const [isDragging, setIsDragging] = useState(false);
+
     useEffect(() => {
         if (selectedPost) {
             dialogRef.current?.showModal();
@@ -257,6 +260,36 @@ export default function PhotoWall({ settings, currentUser }: PhotoWallProps) {
         }
     };
 
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+        
+        if (e.dataTransfer.files) {
+            const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
+            if (files.length > 0) {
+                setNewImageFiles(prev => [...prev, ...files]);
+                
+                files.forEach(file => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        setPreviewUrls(prev => [...prev, reader.result as string]);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
+    };
+
     return (
         <section className="memphis-card bg-memphis-orange flex flex-col gap-4">
             <div className="flex justify-between items-center border-b-3 border-memphis-black pb-2">
@@ -275,7 +308,13 @@ export default function PhotoWall({ settings, currentUser }: PhotoWallProps) {
                         <p className="font-bold">请先登录以添加照片</p>
                     </div>
                 ) : (
-                    <div className="bg-white border-3 border-memphis-black p-4 shadow-[4px_4px_0_#232323] flex flex-col gap-3">
+                    <div 
+                        className={`bg-white border-3 border-memphis-black p-4 shadow-[4px_4px_0_#232323] flex flex-col gap-3 transition-colors ${isDragging ? 'bg-blue-50 border-dashed' : ''}`}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleDrop}
+                    >
+                        {isDragging && <div className="text-center font-bold text-memphis-blue pointer-events-none">释放以添加照片...</div>}
                         <div>
                         <label className="font-bold block mb-1">描述 (可选)</label>
                         <input 

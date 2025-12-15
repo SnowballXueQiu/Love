@@ -5,6 +5,7 @@ import BlessingCounter from "@/components/BlessingCounter";
 import MessageBoard from "@/components/MessageBoard";
 import PhotoWall from "@/components/PhotoWall";
 import SettingsModal from "@/components/SettingsModal";
+import MusicPlayer from "@/components/MusicPlayer";
 import { AppSettings } from "@/types";
 import { supabase } from "@/lib/supabase";
 import { setCookie, getCookie, eraseCookie } from "@/utils/cookie";
@@ -269,6 +270,9 @@ export default function Home() {
 
       {/* Message Board */}
       <MessageBoard settings={settings} currentUser={currentUser} />
+
+      {/* Music Player */}
+      <MusicPlayer settings={settings} currentUser={currentUser} />
 
       {/* Photo Wall */}
       <PhotoWall settings={settings} currentUser={currentUser} />
