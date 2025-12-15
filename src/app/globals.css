@@ -1,5 +1,9 @@
 @import "@unocss/reset/tailwind.css";
 
+html {
+  scrollbar-gutter: stable;
+}
+
 :root {
   --color-bg: #f0f0f0;
   --color-pink: #ff90e8;

@@ -22,4 +22,5 @@ export interface PhotoPost {
     imageUrls: string[];
     description?: string;
     date: string;
+    uploader?: string; // 'name1' or 'name2'
 }
