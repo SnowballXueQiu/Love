@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { AppSettings, Message } from "@/types";
 import { supabase } from "@/lib/supabase";
 
@@ -14,10 +14,17 @@ export default function MessageBoard({ settings }: MessageBoardProps) {
     const [inputPassword, setInputPassword] = useState("");
     const [errorMsg, setErrorMsg] = useState("");
     const [newMessage, setNewMessage] = useState("");
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
 
     useEffect(() => {
-        if (!isUnlocked) return;
+        scrollToBottom();
+    }, [messages]);
 
+    useEffect(() => {
         // Fetch initial messages
         const fetchMessages = async () => {
             const { data } = await supabase
@@ -34,14 +41,19 @@ export default function MessageBoard({ settings }: MessageBoardProps) {
         const channel = supabase
             .channel('messages')
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
-                setMessages((prev) => [...prev, payload.new as Message]);
+                const newMsg = payload.new as Message;
+                setMessages((prev) => {
+                    // Prevent duplicates if we already added it manually
+                    if (prev.some(m => m.id === newMsg.id)) return prev;
+                    return [...prev, newMsg];
+                });
             })
             .subscribe();
 
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [isUnlocked]);
+    }, []);
 
     const handleUnlock = () => {
         if (inputPassword === settings.password1) {
@@ -60,50 +72,34 @@ export default function MessageBoard({ settings }: MessageBoardProps) {
     const handleSendMessage = async () => {
         if (!newMessage.trim()) return;
         
-        const msg = {
+        const msgPayload = {
             text: newMessage,
             date: new Date().toISOString(),
             sender: currentUser || undefined,
         };
 
-        await supabase.from('messages').insert([msg]);
-        setNewMessage("");
+        const { data, error } = await supabase
+            .from('messages')
+            .insert([msgPayload])
+            .select()
+            .single();
+
+        if (data) {
+            setMessages((prev) => [...prev, data as Message]);
+            setNewMessage("");
+        }
     };
 
-    if (!isUnlocked) {
-        return (
-            <section className="memphis-card bg-memphis-yellow min-h-[300px] flex flex-col items-center justify-center gap-4">
-                <h2 className="text-xl font-bold border-b-3 border-memphis-black pb-2 mb-2 w-full text-center">留言板 💌</h2>
-                <div className="flex flex-col items-center gap-3 w-full max-w-xs mx-auto">
-                    <p className="font-bold">请输入密码查看留言</p>
-                    <div className="flex gap-2 w-full items-center justify-center">
-                        <input
-                            type="password"
-                            value={inputPassword}
-                            onChange={(e) => setInputPassword(e.target.value)}
-                            placeholder="Password"
-                            className="memphis-input flex-1"
-                        />
-                        <button onClick={handleUnlock} className="memphis-btn bg-memphis-white text-sm whitespace-nowrap">
-                            解锁
-                        </button>
-                    </div>
-                    {errorMsg && <p className="text-red-600 font-bold text-sm">{errorMsg}</p>}
-                </div>
-            </section>
-        );
-    }
-
     return (
-        <section className="memphis-card bg-memphis-yellow min-h-[300px] flex flex-col h-full">
+        <section className="memphis-card bg-memphis-yellow min-h-[400px] flex flex-col h-full">
             <h2 className="text-xl font-bold border-b-3 border-memphis-black pb-2 mb-4 text-center">留言板 💌</h2>
 
-            <div className="flex-1 overflow-y-auto mb-4 pr-2 max-h-[300px] space-y-3">
+            <div className="flex-1 overflow-y-auto mb-4 pr-2 max-h-[400px] space-y-3 min-h-[200px]">
                 {messages.length === 0 ? (
                     <p className="text-center opacity-60 italic">还没有留言，说点什么吧...</p>
                 ) : (
                     messages.map((msg) => {
-                        const isMe = msg.sender === currentUser;
+                        const isMe = currentUser && msg.sender === currentUser;
                         const senderName = msg.sender === "name1" ? settings.name1 : (msg.sender === "name2" ? settings.name2 : "Unknown");
                         const senderAvatar = msg.sender === "name1" ? settings.avatar1 : (msg.sender === "name2" ? settings.avatar2 : "");
                         
@@ -125,21 +121,41 @@ export default function MessageBoard({ settings }: MessageBoardProps) {
                         );
                     })
                 )}
+                <div ref={messagesEndRef} />
             </div>
 
-            <div className="flex gap-2">
-                <input
-                    type="text"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                    placeholder="写下你想说的话..."
-                    className="memphis-input flex-1"
-                />
-                <button onClick={handleSendMessage} className="memphis-btn bg-memphis-white">
-                    发送
-                </button>
-            </div>
+            {!isUnlocked ? (
+                <div className="border-t-2 border-memphis-black pt-4">
+                    <p className="text-center text-sm font-bold mb-2">输入密码以发送留言</p>
+                    <div className="flex gap-2 w-full items-center justify-center">
+                        <input
+                            type="password"
+                            value={inputPassword}
+                            onChange={(e) => setInputPassword(e.target.value)}
+                            placeholder="Password"
+                            className="memphis-input flex-1"
+                        />
+                        <button onClick={handleUnlock} className="memphis-btn bg-memphis-white text-sm whitespace-nowrap">
+                            解锁
+                        </button>
+                    </div>
+                    {errorMsg && <p className="text-red-600 font-bold text-sm text-center mt-1">{errorMsg}</p>}
+                </div>
+            ) : (
+                <div className="flex gap-2 border-t-2 border-memphis-black pt-4">
+                    <input
+                        type="text"
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                        placeholder={`作为 ${currentUser === 'name1' ? settings.name1 : settings.name2} 发言...`}
+                        className="memphis-input flex-1"
+                    />
+                    <button onClick={handleSendMessage} className="memphis-btn bg-memphis-white">
+                        发送
+                    </button>
+                </div>
+            )}
         </section>
     );
 }

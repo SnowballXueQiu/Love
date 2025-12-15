@@ -15,11 +15,15 @@ const defaultSettings: AppSettings = {
   avatar2: "",
   password2: "456",
   startDate: new Date().toISOString().split('T')[0], // Today
+  adminPassword: process.env.NEXT_PUBLIC_SETTINGS_PASSWORD || "admin123",
 };
 
 export default function Home() {
   const [settings, setSettings] = useState<AppSettings>(defaultSettings);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isUnlockOpen, setIsUnlockOpen] = useState(false);
+  const [unlockPassword, setUnlockPassword] = useState("");
+  const [unlockError, setUnlockError] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,6 +35,7 @@ export default function Home() {
       
       if (data) {
         setSettings({
+            id: data.id,
             name1: data.name1,
             avatar1: data.avatar1,
             password1: data.password1_hash, // Mapping from DB column
@@ -38,6 +43,7 @@ export default function Home() {
             avatar2: data.avatar2,
             password2: data.password2_hash, // Mapping from DB column
             startDate: data.start_date,
+            adminPassword: data.admin_password || process.env.NEXT_PUBLIC_SETTINGS_PASSWORD || "admin123",
         });
       }
       setLoading(false);
@@ -48,16 +54,34 @@ export default function Home() {
 
   const handleSettingsUpdate = async (newSettings: AppSettings) => {
       setSettings(newSettings);
-      // Update DB
-      await supabase.from('settings').update({
-          name1: newSettings.name1,
-          avatar1: newSettings.avatar1,
-          password1_hash: newSettings.password1,
-          name2: newSettings.name2,
-          avatar2: newSettings.avatar2,
-          password2_hash: newSettings.password2,
-          start_date: newSettings.startDate
-      }).eq('id', 1); // Assuming single row with ID 1
+      
+      if (newSettings.id) {
+          // Update existing row
+          await supabase.from('settings').update({
+              name1: newSettings.name1,
+              avatar1: newSettings.avatar1,
+              password1_hash: newSettings.password1,
+              name2: newSettings.name2,
+              avatar2: newSettings.avatar2,
+              password2_hash: newSettings.password2,
+              start_date: newSettings.startDate,
+              admin_password: newSettings.adminPassword
+          }).eq('id', newSettings.id);
+      } else {
+          // Fallback if no ID (shouldn't happen if fetched correctly)
+          console.error("No settings ID found, cannot update.");
+      }
+  };
+
+  const handleUnlockSettings = () => {
+      if (unlockPassword === settings.adminPassword) {
+          setIsUnlockOpen(false);
+          setIsSettingsOpen(true);
+          setUnlockPassword("");
+          setUnlockError("");
+      } else {
+          setUnlockError("密码错误");
+      }
   };
 
   if (loading) {
@@ -73,7 +97,7 @@ export default function Home() {
         </h1>
         <p className="opacity-80 text-sm font-bold">在一起已经</p>
         <button
-          onClick={() => setIsSettingsOpen(true)}
+          onClick={() => setIsUnlockOpen(true)}
           className="absolute top-2 right-2 text-xl hover:scale-110 transition bg-transparent border-none p-0 cursor-pointer"
         >
           ⚙️
@@ -88,6 +112,28 @@ export default function Home() {
 
       {/* Photo Wall */}
       <PhotoWall settings={settings} />
+
+      {/* Unlock Settings Modal */}
+      {isUnlockOpen && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center p-4">
+              <div className="memphis-card bg-memphis-yellow w-full max-w-xs relative flex flex-col gap-3 items-center">
+                  <button onClick={() => setIsUnlockOpen(false)} className="absolute top-2 right-2 font-bold hover:scale-110 transition">&times;</button>
+                  <h3 className="font-bold text-lg">解锁设置</h3>
+                  <p className="text-sm">请输入管理员密码</p>
+                  <input 
+                      type="password" 
+                      className="memphis-input w-full"
+                      value={unlockPassword}
+                      onChange={(e) => setUnlockPassword(e.target.value)}
+                      placeholder="Admin Password"
+                  />
+                  {unlockError && <p className="text-red-600 font-bold text-sm">{unlockError}</p>}
+                  <button onClick={handleUnlockSettings} className="memphis-btn bg-memphis-white w-full">
+                      确认
+                  </button>
+              </div>
+          </div>
+      )}
 
       {/* Settings Modal */}
       <SettingsModal

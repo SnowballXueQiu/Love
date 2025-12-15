@@ -1,4 +1,5 @@
 export interface AppSettings {
+    id?: number;
     name1: string;
     avatar1: string;
     password1: string;
@@ -6,6 +7,7 @@ export interface AppSettings {
     avatar2: string;
     password2: string;
     startDate: string; // ISO date string YYYY-MM-DD
+    adminPassword?: string;
 }
 
 export interface Message {
