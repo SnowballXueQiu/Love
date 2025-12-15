@@ -6,6 +6,7 @@ import MessageBoard from "@/components/MessageBoard";
 import PhotoWall from "@/components/PhotoWall";
 import SettingsModal from "@/components/SettingsModal";
 import MusicPlayer from "@/components/MusicPlayer";
+import ChinaMap from "@/components/ChinaMap";
 import { AppSettings } from "@/types";
 import { supabase } from "@/lib/supabase";
 import { setCookie, getCookie, eraseCookie } from "@/utils/cookie";
@@ -273,6 +274,9 @@ export default function Home() {
 
       {/* Music Player */}
       <MusicPlayer settings={settings} currentUser={currentUser} />
+
+      {/* China Map */}
+      <ChinaMap currentUser={currentUser} />
 
       {/* Photo Wall */}
       <PhotoWall settings={settings} currentUser={currentUser} />
