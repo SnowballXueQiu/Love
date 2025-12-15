@@ -41,7 +41,7 @@ export default function Countdown({ targetDate }: CountdownProps) {
     }, [targetDate]);
 
     return (
-        <section className="memphis-card bg-memphis-cyan flex justify-around items-center w-full">
+        <section className="memphis-card bg-memphis-purple flex justify-around items-center w-full">
             <TimeBox value={timeLeft.days} label="天" />
             <TimeBox value={timeLeft.hours} label="时" />
             <TimeBox value={timeLeft.minutes} label="分" />

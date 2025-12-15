@@ -23,6 +23,8 @@ export default defineConfig({
                 pink: '#ff90e8',
                 cyan: '#23d5ab',
                 yellow: '#ffc900',
+                purple: '#a06cd5',
+                orange: '#ff9f43',
                 black: '#232323',
                 white: '#ffffff',
             },
@@ -36,6 +38,6 @@ export default defineConfig({
     safelist: [
         'flex', 'flex-col', 'items-center', 'justify-center', 'min-h-screen', 'p-5', 'w-full', 'max-w-[500px]', 'gap-5',
         'text-center', 'relative', 'absolute', 'top-2', 'right-2', 'text-2xl', 'font-bold', 'mb-1', 'uppercase', 'break-words',
-        'bg-memphis-pink', 'bg-memphis-cyan', 'bg-memphis-yellow', 'text-memphis-white', 'text-shadow-sm'
+        'bg-memphis-pink', 'bg-memphis-cyan', 'bg-memphis-yellow', 'bg-memphis-purple', 'bg-memphis-orange', 'text-memphis-white', 'text-shadow-sm'
     ]
 })

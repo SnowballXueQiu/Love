@@ -5,19 +5,22 @@ import { supabase } from "@/lib/supabase";
 
 interface MessageBoardProps {
     settings: AppSettings;
+    currentUser: "name1" | "name2" | null;
 }
 
-export default function MessageBoard({ settings }: MessageBoardProps) {
+export default function MessageBoard({ settings, currentUser }: MessageBoardProps) {
     const [messages, setMessages] = useState<Message[]>([]);
-    const [isUnlocked, setIsUnlocked] = useState(false);
-    const [currentUser, setCurrentUser] = useState<"name1" | "name2" | null>(null);
-    const [inputPassword, setInputPassword] = useState("");
-    const [errorMsg, setErrorMsg] = useState("");
     const [newMessage, setNewMessage] = useState("");
-    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        if (messagesContainerRef.current) {
+            const { scrollHeight, clientHeight } = messagesContainerRef.current;
+            messagesContainerRef.current.scrollTo({
+                top: scrollHeight - clientHeight,
+                behavior: "smooth"
+            });
+        }
     };
 
     useEffect(() => {
@@ -55,20 +58,6 @@ export default function MessageBoard({ settings }: MessageBoardProps) {
         };
     }, []);
 
-    const handleUnlock = () => {
-        if (inputPassword === settings.password1) {
-            setIsUnlocked(true);
-            setCurrentUser("name1");
-            setErrorMsg("");
-        } else if (inputPassword === settings.password2) {
-            setIsUnlocked(true);
-            setCurrentUser("name2");
-            setErrorMsg("");
-        } else {
-            setErrorMsg("密码错误 / Incorrect Password");
-        }
-    };
-
     const handleSendMessage = async () => {
         if (!newMessage.trim()) return;
         
@@ -91,25 +80,33 @@ export default function MessageBoard({ settings }: MessageBoardProps) {
     };
 
     return (
-        <section className="memphis-card bg-memphis-yellow min-h-[400px] flex flex-col h-full">
+        <section className="memphis-card bg-memphis-yellow flex flex-col h-[500px]">
             <h2 className="text-xl font-bold border-b-3 border-memphis-black pb-2 mb-4 text-center">留言板 💌</h2>
 
-            <div className="flex-1 overflow-y-auto mb-4 pr-2 max-h-[400px] space-y-3 min-h-[200px]">
+            <div 
+                ref={messagesContainerRef}
+                className="flex-1 overflow-y-auto mb-4 pr-2 space-y-3"
+            >
                 {messages.length === 0 ? (
                     <p className="text-center opacity-60 italic">还没有留言，说点什么吧...</p>
                 ) : (
                     messages.map((msg) => {
-                        const isMe = currentUser && msg.sender === currentUser;
+                        // If logged in: Current user is on the right (standard chat app behavior)
+                        // If not logged in: Name1 is on Left, Name2 is on Right (dialogue view)
+                        const isRight = currentUser 
+                            ? msg.sender === currentUser 
+                            : msg.sender === "name2";
+                            
                         const senderName = msg.sender === "name1" ? settings.name1 : (msg.sender === "name2" ? settings.name2 : "Unknown");
                         const senderAvatar = msg.sender === "name1" ? settings.avatar1 : (msg.sender === "name2" ? settings.avatar2 : "");
                         
                         return (
-                            <div key={msg.id} className={`flex gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                            <div key={msg.id} className={`flex gap-2 ${isRight ? 'flex-row-reverse' : 'flex-row'}`}>
                                 {senderAvatar && (
                                     <img src={senderAvatar} alt={senderName} className="w-8 h-8 rounded-full border-2 border-memphis-black bg-white object-cover" />
                                 )}
-                                <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[80%]`}>
-                                    <div className={`bg-white border-2 border-memphis-black p-3 shadow-[3px_3px_0_rgba(0,0,0,0.1)] ${isMe ? 'bg-memphis-pink' : 'bg-white'}`}>
+                                <div className={`flex flex-col ${isRight ? 'items-end' : 'items-start'} max-w-[80%]`}>
+                                    <div className={`bg-white border-2 border-memphis-black p-3 shadow-[3px_3px_0_rgba(0,0,0,0.1)] ${isRight ? 'bg-memphis-pink' : 'bg-white'}`}>
                                         <div className="text-xs text-gray-500 mb-1 flex justify-between gap-2 items-center">
                                             <span className="font-bold">{senderName}</span>
                                             <span>{new Date(msg.date).toLocaleString()}</span>
@@ -121,25 +118,11 @@ export default function MessageBoard({ settings }: MessageBoardProps) {
                         );
                     })
                 )}
-                <div ref={messagesEndRef} />
             </div>
 
-            {!isUnlocked ? (
-                <div className="border-t-2 border-memphis-black pt-4">
-                    <p className="text-center text-sm font-bold mb-2">输入密码以发送留言</p>
-                    <div className="flex gap-2 w-full items-center justify-center">
-                        <input
-                            type="password"
-                            value={inputPassword}
-                            onChange={(e) => setInputPassword(e.target.value)}
-                            placeholder="Password"
-                            className="memphis-input flex-1"
-                        />
-                        <button onClick={handleUnlock} className="memphis-btn bg-memphis-white text-sm whitespace-nowrap">
-                            解锁
-                        </button>
-                    </div>
-                    {errorMsg && <p className="text-red-600 font-bold text-sm text-center mt-1">{errorMsg}</p>}
+            {!currentUser ? (
+                <div className="border-t-2 border-memphis-black pt-4 text-center">
+                    <p className="text-sm font-bold opacity-60">请先登录以发送留言</p>
                 </div>
             ) : (
                 <div className="flex gap-2 border-t-2 border-memphis-black pt-4">

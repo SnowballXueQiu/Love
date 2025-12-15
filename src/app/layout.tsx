@@ -11,7 +11,7 @@ const arkPixel = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Couple Countdown",
+  title: process.env.NEXT_PUBLIC_SITE_TITLE || "Couple Countdown",
   description: "A Memphis style countdown for couples",
 };
 

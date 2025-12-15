@@ -86,7 +86,7 @@ export default function BlessingCounter() {
                         {hasBlessed ? '❤️' : '👍'}
                     </span>
                     <span className="uppercase tracking-wider">
-                        {hasBlessed ? 'Thanks!' : 'Bless +1'}
+                        {hasBlessed ? '谢谢喵!' : '99 +1'}
                     </span>
                 </button>
 

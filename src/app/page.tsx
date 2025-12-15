@@ -7,6 +7,7 @@ import PhotoWall from "@/components/PhotoWall";
 import SettingsModal from "@/components/SettingsModal";
 import { AppSettings } from "@/types";
 import { supabase } from "@/lib/supabase";
+import { setCookie, getCookie, eraseCookie } from "@/utils/cookie";
 
 const defaultSettings: AppSettings = {
   name1: "Name1",
@@ -27,7 +28,21 @@ export default function Home() {
   const [unlockError, setUnlockError] = useState("");
   const [loading, setLoading] = useState(true);
 
+  // Auth state
+  const [currentUser, setCurrentUser] = useState<"name1" | "name2" | null>(null);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+
   useEffect(() => {
+    const checkAuth = () => {
+        const user = getCookie("love_user");
+        if (user === "name1" || user === "name2") {
+            setCurrentUser(user);
+        }
+    };
+    checkAuth();
+
     const fetchSettings = async () => {
       const { data, error } = await supabase
         .from('settings')
@@ -69,8 +84,24 @@ export default function Home() {
               admin_password: newSettings.adminPassword
           }).eq('id', newSettings.id);
       } else {
-          // Fallback if no ID (shouldn't happen if fetched correctly)
-          console.error("No settings ID found, cannot update.");
+          // Insert new row if no ID exists
+          const { data, error } = await supabase.from('settings').insert([{
+              name1: newSettings.name1,
+              avatar1: newSettings.avatar1,
+              password1_hash: newSettings.password1,
+              name2: newSettings.name2,
+              avatar2: newSettings.avatar2,
+              password2_hash: newSettings.password2,
+              start_date: newSettings.startDate,
+              admin_password: newSettings.adminPassword
+          }]).select().single();
+
+          if (error) {
+              console.error("Error creating settings:", error);
+          } else if (data) {
+              // Update local state with the new ID
+              setSettings(prev => ({ ...prev, id: data.id }));
+          }
       }
   };
 
@@ -85,6 +116,40 @@ export default function Home() {
       }
   };
 
+  const handleLogin = () => {
+      if (loginPassword === settings.password1) {
+          setCurrentUser("name1");
+          setCookie("love_user", "name1", 30); // 30 days
+          setIsLoginOpen(false);
+          setLoginPassword("");
+          setLoginError("");
+      } else if (loginPassword === settings.password2) {
+          setCurrentUser("name2");
+          setCookie("love_user", "name2", 30); // 30 days
+          setIsLoginOpen(false);
+          setLoginPassword("");
+          setLoginError("");
+      } else {
+          setLoginError("密码错误 / Incorrect Password");
+      }
+  };
+
+  const handleLogout = () => {
+      setCurrentUser(null);
+      eraseCookie("love_user");
+  };
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (isLoginOpen) setIsLoginOpen(false);
+        if (isUnlockOpen) setIsUnlockOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [isLoginOpen, isUnlockOpen]);
+
   if (loading) {
     return <div className="flex justify-center items-center min-h-screen font-bold">Loading...</div>;
   }
@@ -97,12 +162,33 @@ export default function Home() {
           {settings.name1} <span className="text-memphis-white text-shadow-sm">&</span> {settings.name2}
         </h1>
         <p className="opacity-80 text-sm font-bold">在一起已经</p>
-        <button
-          onClick={() => setIsUnlockOpen(true)}
-          className="absolute top-2 right-2 text-xl hover:scale-110 transition bg-transparent border-none p-0 cursor-pointer"
-        >
-          ⚙️
-        </button>
+        
+        <div className="absolute top-2 right-2 flex gap-2">
+            {currentUser ? (
+                <button
+                    onClick={handleLogout}
+                    className="text-sm font-bold hover:scale-110 transition bg-transparent border-none p-0 cursor-pointer"
+                    title="Logout"
+                >
+                    👋
+                </button>
+            ) : (
+                <button
+                    onClick={() => setIsLoginOpen(true)}
+                    className="text-sm font-bold hover:scale-110 transition bg-transparent border-none p-0 cursor-pointer"
+                    title="Login"
+                >
+                    🔑
+                </button>
+            )}
+            <button
+                onClick={() => setIsUnlockOpen(true)}
+                className="text-xl hover:scale-110 transition bg-transparent border-none p-0 cursor-pointer"
+                title="Settings"
+            >
+                ⚙️
+            </button>
+        </div>
       </header>
 
       {/* Countdown */}
@@ -112,10 +198,33 @@ export default function Home() {
       <BlessingCounter />
 
       {/* Message Board */}
-      <MessageBoard settings={settings} />
+      <MessageBoard settings={settings} currentUser={currentUser} />
 
       {/* Photo Wall */}
-      <PhotoWall settings={settings} />
+      <PhotoWall settings={settings} currentUser={currentUser} />
+
+      {/* Login Modal */}
+      {isLoginOpen && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center p-4">
+              <div className="memphis-card bg-memphis-cyan w-full max-w-xs relative flex flex-col gap-3 items-center">
+                  <button onClick={() => setIsLoginOpen(false)} className="absolute top-2 right-2 font-bold hover:scale-110 transition">&times;</button>
+                  <h3 className="font-bold text-lg">用户登录</h3>
+                  <p className="text-sm">请输入您的专属密码</p>
+                  <input 
+                      type="password" 
+                      className="memphis-input w-full"
+                      value={loginPassword}
+                      onChange={(e) => setLoginPassword(e.target.value)}
+                      placeholder="Password"
+                      onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                  />
+                  {loginError && <p className="text-red-600 font-bold text-sm">{loginError}</p>}
+                  <button onClick={handleLogin} className="memphis-btn bg-memphis-white w-full">
+                      登录
+                  </button>
+              </div>
+          </div>
+      )}
 
       {/* Unlock Settings Modal */}
       {isUnlockOpen && (

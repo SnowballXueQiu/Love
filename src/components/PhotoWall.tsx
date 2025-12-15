@@ -6,14 +6,11 @@ import { supabase } from "@/lib/supabase";
 
 interface PhotoWallProps {
     settings: AppSettings;
+    currentUser: "name1" | "name2" | null;
 }
 
-export default function PhotoWall({ settings }: PhotoWallProps) {
+export default function PhotoWall({ settings, currentUser }: PhotoWallProps) {
     const [posts, setPosts] = useState<PhotoPost[]>([]);
-    const [isUnlocked, setIsUnlocked] = useState(false);
-    const [currentUser, setCurrentUser] = useState<"name1" | "name2" | null>(null);
-    const [inputPassword, setInputPassword] = useState("");
-    const [errorMsg, setErrorMsg] = useState("");
     
     // Form state
     const [isAdding, setIsAdding] = useState(false);
@@ -102,20 +99,6 @@ export default function PhotoWall({ settings }: PhotoWallProps) {
             supabase.removeChannel(channel);
         };
     }, []);
-
-    const handleUnlock = () => {
-        if (inputPassword === settings.password1) {
-            setIsUnlocked(true);
-            setCurrentUser("name1");
-            setErrorMsg("");
-        } else if (inputPassword === settings.password2) {
-            setIsUnlocked(true);
-            setCurrentUser("name2");
-            setErrorMsg("");
-        } else {
-            setErrorMsg("密码错误 / Incorrect Password");
-        }
-    };
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
@@ -275,7 +258,7 @@ export default function PhotoWall({ settings }: PhotoWallProps) {
     };
 
     return (
-        <section className="memphis-card bg-memphis-cyan flex flex-col gap-4">
+        <section className="memphis-card bg-memphis-orange flex flex-col gap-4">
             <div className="flex justify-between items-center border-b-3 border-memphis-black pb-2">
                 <h2 className="text-xl font-bold">照片墙 📸</h2>
                 <button 
@@ -287,22 +270,9 @@ export default function PhotoWall({ settings }: PhotoWallProps) {
             </div>
 
             {isAdding && (
-                !isUnlocked ? (
+                !currentUser ? (
                     <div className="bg-white border-3 border-memphis-black p-4 shadow-[4px_4px_0_#232323] flex flex-col gap-3 items-center">
-                        <p className="font-bold">请输入密码以添加照片</p>
-                        <div className="flex gap-2 w-full items-center justify-center">
-                            <input
-                                type="password"
-                                value={inputPassword}
-                                onChange={(e) => setInputPassword(e.target.value)}
-                                placeholder="Password"
-                                className="memphis-input flex-1"
-                            />
-                            <button onClick={handleUnlock} className="memphis-btn bg-memphis-pink text-sm whitespace-nowrap">
-                                解锁
-                            </button>
-                        </div>
-                        {errorMsg && <p className="text-red-600 font-bold text-sm">{errorMsg}</p>}
+                        <p className="font-bold">请先登录以添加照片</p>
                     </div>
                 ) : (
                     <div className="bg-white border-3 border-memphis-black p-4 shadow-[4px_4px_0_#232323] flex flex-col gap-3">

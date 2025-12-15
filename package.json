@@ -7,7 +7,9 @@
     "uno": "pnpm exec unocss \"src/**/*.{tsx,ts,jsx,js}\" -o src/app/uno.css --watch",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "script:test-connection": "node scripts/test-connection.mjs",
+    "script:delete-test-data": "node scripts/delete-test-data.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.87.1",
