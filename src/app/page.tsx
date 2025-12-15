@@ -34,6 +34,9 @@ export default function Home() {
   const [loginPassword, setLoginPassword] = useState("");
   const [loginError, setLoginError] = useState("");
 
+  // Presence state
+  const [partnerOnline, setPartnerOnline] = useState(false);
+
   useEffect(() => {
     const checkAuth = () => {
         const user = getCookie("love_user");
@@ -150,6 +153,66 @@ export default function Home() {
     return () => window.removeEventListener("keydown", handleEsc);
   }, [isLoginOpen, isUnlockOpen]);
 
+  useEffect(() => {
+    if (!currentUser) {
+        setPartnerOnline(false);
+        return;
+    }
+
+    const channel = supabase.channel('online_users');
+
+    const updateStatus = async (isFocused: boolean) => {
+        await channel.track({
+            user: currentUser,
+            online_at: new Date().toISOString(),
+            is_focused: isFocused
+        });
+    };
+
+    channel
+        .on('presence', { event: 'sync' }, () => {
+            const newState = channel.presenceState();
+            const partnerName = currentUser === 'name1' ? 'name2' : 'name1';
+            
+            let isPartnerHere = false;
+            // Iterate through presence state to find partner
+            for (const key in newState) {
+                const presences = newState[key];
+                for (const p of presences) {
+                    // @ts-ignore
+                    if (p.user === partnerName && p.is_focused) {
+                        isPartnerHere = true;
+                        break;
+                    }
+                }
+            }
+            setPartnerOnline(isPartnerHere);
+        })
+        .subscribe(async (status) => {
+            if (status === 'SUBSCRIBED') {
+                await updateStatus(document.visibilityState === 'visible');
+            }
+        });
+
+    const handleVisibilityChange = () => {
+        updateStatus(document.visibilityState === 'visible');
+    };
+    
+    const handleFocus = () => updateStatus(true);
+    const handleBlur = () => updateStatus(false);
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('blur', handleBlur);
+
+    return () => {
+        channel.unsubscribe();
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+        window.removeEventListener('focus', handleFocus);
+        window.removeEventListener('blur', handleBlur);
+    };
+  }, [currentUser]);
+
   if (loading) {
     return <div className="flex justify-center items-center min-h-screen font-bold">Loading...</div>;
   }
@@ -161,6 +224,13 @@ export default function Home() {
         <h1 className="text-2xl font-bold mb-1 uppercase break-words">
           {settings.name1} <span className="text-memphis-white text-shadow-sm">&</span> {settings.name2}
         </h1>
+        
+        {partnerOnline && (
+            <div className="text-xs font-bold text-memphis-white bg-memphis-black/20 inline-block px-2 py-0.5 rounded-full mb-1 animate-pulse">
+                👀 对方也在看
+            </div>
+        )}
+
         <p className="opacity-80 text-sm font-bold">在一起已经</p>
         
         <div className="absolute top-2 right-2 flex gap-2">
