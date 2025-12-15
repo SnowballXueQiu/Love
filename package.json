@@ -3,12 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "concurrently \"pnpm run uno\" \"next dev\"",
+    "uno": "pnpm exec unocss \"src/**/*.{tsx,ts,jsx,js}\" -o src/app/uno.css --watch",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.87.1",
     "next": "16.0.10",
     "react": "19.2.1",
     "react-dom": "19.2.1"
@@ -17,8 +19,13 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@unocss/cli": "^66.5.10",
+    "@unocss/postcss": "^66.5.10",
+    "@unocss/reset": "^66.5.10",
+    "concurrently": "^9.2.1",
     "eslint": "^9",
     "eslint-config-next": "16.0.10",
-    "typescript": "^5"
+    "typescript": "^5",
+    "unocss": "^66.5.10"
   }
 }

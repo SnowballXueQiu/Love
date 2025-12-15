@@ -1,42 +1,18 @@
+@import "@unocss/reset/tailwind.css";
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-bg: #f0f0f0;
+  --color-pink: #ff90e8;
+  --color-cyan: #23d5ab;
+  --color-yellow: #ffc900;
+  --color-black: #232323;
+  --color-white: #ffffff;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-html,
 body {
-  max-width: 100vw;
+  background-color: var(--color-bg);
+  background-image: radial-gradient(var(--color-black) 1px, transparent 1px);
+  background-size: 20px 20px;
+  color: var(--color-black);
   overflow-x: hidden;
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
 }
