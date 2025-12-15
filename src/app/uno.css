@@ -72,6 +72,7 @@
 .mt-1{margin-top:0.25rem;}
 .mt-2{margin-top:0.5rem;}
 .mt-auto{margin-top:auto;}
+.inline{display:inline;}
 .block,
 [block=""]{display:block;}
 .inline-block{display:inline-block;}

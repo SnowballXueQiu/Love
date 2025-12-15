@@ -10,6 +10,7 @@ import ChinaMap from "@/components/ChinaMap";
 import { AppSettings } from "@/types";
 import { supabase } from "@/lib/supabase";
 import { setCookie, getCookie, eraseCookie } from "@/utils/cookie";
+import useLockBodyScroll from "@/hooks/useLockBodyScroll";
 
 const defaultSettings: AppSettings = {
   name1: "Name1",
@@ -38,6 +39,20 @@ export default function Home() {
 
   // Presence state
   const [partnerOnline, setPartnerOnline] = useState(false);
+
+  useLockBodyScroll(isLoginOpen || isUnlockOpen);
+
+  // Handle ESC key for inline modals
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (isLoginOpen) setIsLoginOpen(false);
+        if (isUnlockOpen) setIsUnlockOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isLoginOpen, isUnlockOpen]);
 
   useEffect(() => {
     const checkAuth = () => {
@@ -143,17 +158,6 @@ export default function Home() {
       setCurrentUser(null);
       eraseCookie("love_user");
   };
-
-  useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        if (isLoginOpen) setIsLoginOpen(false);
-        if (isUnlockOpen) setIsUnlockOpen(false);
-      }
-    };
-    window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
-  }, [isLoginOpen, isUnlockOpen]);
 
   useEffect(() => {
     if (!currentUser) {

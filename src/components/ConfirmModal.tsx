@@ -1,5 +1,6 @@
 "use client";
 import { useRef, useEffect } from "react";
+import useLockBodyScroll from "@/hooks/useLockBodyScroll";
 
 interface ConfirmModalProps {
     isOpen: boolean;
@@ -11,6 +12,8 @@ interface ConfirmModalProps {
 
 export default function ConfirmModal({ isOpen, title, message, onConfirm, onCancel }: ConfirmModalProps) {
     const dialogRef = useRef<HTMLDialogElement>(null);
+
+    useLockBodyScroll(isOpen);
 
     useEffect(() => {
         if (isOpen) {

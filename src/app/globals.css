@@ -20,3 +20,44 @@ body {
   color: var(--color-black);
   overflow-x: hidden;
 }
+
+/* Custom Scrollbar (Memphis Style) */
+* {
+  scrollbar-width: auto;
+  scrollbar-color: #ffd166 #ffffff;
+}
+
+*::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #fff;
+  border: 2px solid #232323;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #ffd166; /* Memphis Yellow */
+  border: 2px solid #232323;
+  border-radius: 0;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: #ef476f; /* Memphis Pink */
+}
+
+/* Hide scrollbar on mobile devices */
+@media (max-width: 768px) {
+  *::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  * {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+}

@@ -1,7 +1,8 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { AppSettings } from "@/types";
 import { supabase } from "@/lib/supabase";
+import useLockBodyScroll from "@/hooks/useLockBodyScroll";
 
 interface SettingsModalProps {
     isOpen: boolean;
@@ -15,12 +16,21 @@ export default function SettingsModal({ isOpen, onClose, settings, onSave }: Set
     const [avatar1File, setAvatar1File] = useState<File | null>(null);
     const [avatar2File, setAvatar2File] = useState<File | null>(null);
     const [uploading, setUploading] = useState(false);
+    const dialogRef = useRef<HTMLDialogElement>(null);
+
+    useLockBodyScroll(isOpen);
 
     useEffect(() => {
         setFormData(settings);
     }, [settings]);
 
-    if (!isOpen) return null;
+    useEffect(() => {
+        if (isOpen) {
+            dialogRef.current?.showModal();
+        } else {
+            dialogRef.current?.close();
+        }
+    }, [isOpen]);
 
     const uploadAvatar = async (file: File) => {
         const fileName = `avatar-${Date.now()}-${file.name}`;
@@ -66,12 +76,19 @@ export default function SettingsModal({ isOpen, onClose, settings, onSave }: Set
     };
 
     return (
-        <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center p-4">
+        <dialog
+            ref={dialogRef}
+            className="bg-transparent p-0 border-none outline-none backdrop:bg-black/50 backdrop:backdrop-blur-sm open:animate-in open:fade-in open:zoom-in-95 duration-200 m-auto"
+            onClick={(e) => {
+                if (e.target === dialogRef.current) onClose();
+            }}
+            onCancel={onClose}
+        >
             <div className="memphis-card bg-memphis-pink w-full max-w-sm relative">
                 <button onClick={onClose} className="absolute top-3 right-4 text-2xl font-bold hover:scale-110 transition">&times;</button>
                 <h2 className="text-xl font-bold mb-4 text-center">设置</h2>
 
-                <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
                     <div className="border-b-2 border-memphis-black pb-4">
                         <h3 className="font-bold mb-2 text-memphis-pink bg-white inline-block px-2 border-2 border-memphis-black shadow-[2px_2px_0_#232323]">Person 1</h3>
                         <div className="space-y-2 mt-2">
@@ -188,6 +205,6 @@ export default function SettingsModal({ isOpen, onClose, settings, onSave }: Set
                     {uploading ? "保存中..." : "保存"}
                 </button>
             </div>
-        </div>
+        </dialog>
     );
 }

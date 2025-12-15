@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import { CHINA_REGIONS_BY_PINYIN } from "@/constants/china-regions";
 import { supabase } from "@/lib/supabase";
+import useLockBodyScroll from "@/hooks/useLockBodyScroll";
 
 interface MapEditModalProps {
     isOpen: boolean;
@@ -12,6 +13,8 @@ interface MapEditModalProps {
 export default function MapEditModal({ isOpen, onClose, visitedPlaces }: MapEditModalProps) {
     const [loading, setLoading] = useState(false);
     const dialogRef = useRef<HTMLDialogElement>(null);
+
+    useLockBodyScroll(isOpen);
 
     useEffect(() => {
         if (isOpen) {

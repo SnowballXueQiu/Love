@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { AppSettings, PhotoPost } from "@/types";
 import { supabase } from "@/lib/supabase";
+import useLockBodyScroll from "@/hooks/useLockBodyScroll";
 
 interface PhotoWallProps {
     settings: AppSettings;
@@ -33,6 +34,8 @@ export default function PhotoWall({ settings, currentUser }: PhotoWallProps) {
 
     // Drag and drop state
     const [isDragging, setIsDragging] = useState(false);
+
+    useLockBodyScroll(!!selectedPost);
 
     useEffect(() => {
         if (selectedPost) {
