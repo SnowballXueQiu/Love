@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Countdown from "@/components/Countdown";
+import BlessingCounter from "@/components/BlessingCounter";
 import MessageBoard from "@/components/MessageBoard";
 import PhotoWall from "@/components/PhotoWall";
 import SettingsModal from "@/components/SettingsModal";
@@ -106,6 +107,9 @@ export default function Home() {
 
       {/* Countdown */}
       <Countdown targetDate={settings.startDate} />
+
+      {/* Blessing Counter */}
+      <BlessingCounter />
 
       {/* Message Board */}
       <MessageBoard settings={settings} />
