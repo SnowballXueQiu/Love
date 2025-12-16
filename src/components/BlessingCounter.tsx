@@ -317,19 +317,19 @@ export default function BlessingCounter({ currentUser }: BlessingCounterProps) {
                         onChange={(e) => setNewMessage(e.target.value)}
                         maxLength={30}
                         placeholder="留个言吧 (30字以内)..."
-                        className="flex-1 memphis-input text-sm py-1"
+                        className="flex-1 memphis-input text-sm py-1 min-w-0"
                         onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                     />
                     <button 
                         onClick={handleSendMessage}
                         disabled={isSending || !newMessage.trim()}
-                        className="memphis-btn bg-memphis-pink text-white text-sm px-3 py-1 whitespace-nowrap"
+                        className="memphis-btn bg-memphis-pink text-white text-sm px-3 py-1 whitespace-nowrap shrink-0"
                     >
                         发送
                     </button>
                     <button 
                         onClick={() => setIsListOpen(true)}
-                        className="memphis-btn bg-white text-memphis-black text-sm px-3 py-1 whitespace-nowrap"
+                        className="memphis-btn bg-white text-memphis-black text-sm px-3 py-1 whitespace-nowrap shrink-0"
                         title="查看所有留言"
                     >
                         📜
