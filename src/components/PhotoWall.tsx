@@ -11,8 +11,8 @@ interface PhotoWallProps {
 }
 
 export default function PhotoWall({ settings, currentUser }: PhotoWallProps) {
+
     const [posts, setPosts] = useState<PhotoPost[]>([]);
-    
     // Form state
     const [isAdding, setIsAdding] = useState(false);
     const [newDescription, setNewDescription] = useState("");
@@ -409,7 +409,6 @@ export default function PhotoWall({ settings, currentUser }: PhotoWallProps) {
                                                 fill
                                                 className="object-cover hover:scale-110 transition-transform duration-300"
                                                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                                unoptimized
                                             />
                                         </div>
                                     ))}

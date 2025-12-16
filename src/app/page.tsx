@@ -1,16 +1,18 @@
 "use client";
-import { useState, useEffect } from "react";
-import Countdown from "@/components/Countdown";
-import BlessingCounter from "@/components/BlessingCounter";
-import MessageBoard from "@/components/MessageBoard";
-import PhotoWall from "@/components/PhotoWall";
-import SettingsModal from "@/components/SettingsModal";
-import MusicPlayer from "@/components/MusicPlayer";
-import ChinaMap from "@/components/ChinaMap";
+import { useState, useEffect, lazy, useTransition } from "react";
 import { AppSettings } from "@/types";
 import { supabase } from "@/lib/supabase";
 import { setCookie, getCookie, eraseCookie } from "@/utils/cookie";
 import useLockBodyScroll from "@/hooks/useLockBodyScroll";
+
+
+const Countdown = lazy(()=>import("@/components/Countdown"));
+const BlessingCounter = lazy(()=>import("@/components/BlessingCounter"));
+const MessageBoard = lazy(()=>import("@/components/MessageBoard"));
+const PhotoWall = lazy(()=>import("@/components/PhotoWall"));
+const SettingsModal = lazy(()=>import("@/components/SettingsModal"));
+const MusicPlayer = lazy(()=>import("@/components/MusicPlayer"));
+const ChinaMap = lazy(()=>import("@/components/ChinaMap"));
 
 const defaultSettings: AppSettings = {
   name1: "Name1",
@@ -75,25 +77,26 @@ export default function Home() {
         .select('*')
         .single();
       
-      if (data) {
-        setSettings({
-            id: data.id,
-            name1: data.name1,
-            avatar1: data.avatar1,
-            password1: data.password1_hash, // Mapping from DB column
-            name2: data.name2,
-            avatar2: data.avatar2,
-            password2: data.password2_hash, // Mapping from DB column
-            startDate: data.start_date,
-            adminPassword: data.admin_password || process.env.NEXT_PUBLIC_SETTINGS_PASSWORD || "admin123",
-            showCountdown: data.show_countdown ?? true,
-            showBlessing: data.show_blessing ?? true,
-            showMessageBoard: data.show_message_board ?? true,
-            showPhotoWall: data.show_photo_wall ?? true,
-            showMusicPlayer: data.show_music_player ?? true,
-            showMap: data.show_map ?? true,
-        });
+      if (!data) {
+        return;
       }
+      setSettings({
+          id: data.id,
+          name1: data.name1,
+          avatar1: data.avatar1,
+          password1: data.password1_hash, // Mapping from DB column
+          name2: data.name2,
+          avatar2: data.avatar2,
+          password2: data.password2_hash, // Mapping from DB column
+          startDate: data.start_date,
+          adminPassword: data.admin_password || process.env.NEXT_PUBLIC_SETTINGS_PASSWORD || "admin123",
+          showCountdown: data.show_countdown ?? true,
+          showBlessing: data.show_blessing ?? true,
+          showMessageBoard: data.show_message_board ?? true,
+          showPhotoWall: data.show_photo_wall ?? true,
+          showMusicPlayer: data.show_music_player ?? true,
+          showMap: data.show_map ?? true,
+      });
       setLoading(false);
     };
 
@@ -185,7 +188,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!currentUser) {
-        setPartnerOnline(false);
+        // setPartnerOnline(false);
         return;
     }
 
