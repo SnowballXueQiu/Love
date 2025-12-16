@@ -62,7 +62,6 @@ export default function ChinaMap({ currentUser }: ChinaMapProps) {
                 }
             })
             .subscribe();
-
         return () => {
             supabase.removeChannel(channel);
         };
@@ -74,6 +73,7 @@ export default function ChinaMap({ currentUser }: ChinaMapProps) {
         const data = fullNames.map(name => ({ name, value: 1 }));
 
         return {
+          
             backgroundColor: 'transparent',
             tooltip: {
                 trigger: 'item',
@@ -95,6 +95,10 @@ export default function ChinaMap({ currentUser }: ChinaMapProps) {
                 map: 'china',
                 roam: true, // Allow zooming/panning
                 zoom: 1.2,
+                scaleLimit:{
+                  min: 1,
+                  max: 5,
+                },
                 label: {
                     show: false,
                     color: '#232323',
@@ -141,18 +145,21 @@ export default function ChinaMap({ currentUser }: ChinaMapProps) {
                     name: 'Visited',
                     type: 'map',
                     geoIndex: 0,
+                    roam: 'scale',
                     data: data,
                     selectedMode: false,
                     select: {
-                        disabled: true
+                      disabled: true
                     }
                 }
             ]
-        };
+        } as echarts.EChartsOption;
     };
 
     return (
-        <section className="memphis-card bg-memphis-cyan flex flex-col w-full h-[500px] relative overflow-hidden">
+        <section
+          className="memphis-card bg-memphis-cyan flex flex-col w-full h-[500px] relative overflow-hidden"
+        >
             <div className="flex justify-between items-center border-b-3 border-memphis-black pb-2 mb-4">
                 <h2 className="text-xl font-bold text-white text-shadow-sm">
                     我们的足迹 🗺️
@@ -172,7 +179,8 @@ export default function ChinaMap({ currentUser }: ChinaMapProps) {
                     <ReactECharts 
                         option={getOption()} 
                         style={{ height: '100%', width: '100%' }}
-                        opts={{ renderer: 'svg' }}
+                        opts={{ renderer: 'canvas' }}
+                        
                     />
                 ) : (
                     <div className="flex items-center justify-center h-full">
