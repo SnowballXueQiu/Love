@@ -42,7 +42,17 @@
 - 默认值均为 `TRUE` (开启)。
 - 允许管理员在设置面板中动态控制各个功能模块的显示与隐藏。
 
-### 6. `99_legacy_supabase_schema.sql` (旧版/备份)
+### 6. `05_public_messages.sql` (路人弹幕)
+**用途**: 初始化路人留言/弹幕功能所需的表结构。
+**包含内容**:
+- 创建 `public_messages` 表：存储路人发送的弹幕内容和时间。
+- **RLS 策略**:
+    - `Enable read access for all users`: 允许所有人读取弹幕。
+    - `Enable insert access for all users`: 允许所有人发送弹幕。
+    - `Enable delete for authenticated users only`: 仅允许登录的管理员删除弹幕。
+- 启用 Realtime 功能，实现弹幕实时推送。
+
+### 7. `99_legacy_supabase_schema.sql` (旧版/备份)
 **用途**: 项目早期的 Schema 备份文件。
 **说明**: 包含了一些早期的表定义和默认数据插入语句。主要作为参考保留，建议使用 `00_schema_setup.sql` 进行初始化。
 

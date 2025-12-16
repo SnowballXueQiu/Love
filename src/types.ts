@@ -41,3 +41,9 @@ export interface Song {
     uploader?: string;
     created_at: string;
 }
+
+export interface PublicMessage {
+    id: string;
+    content: string;
+    created_at: string;
+}

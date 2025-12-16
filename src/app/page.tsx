@@ -295,7 +295,7 @@ export default function Home() {
       {settings.showCountdown && <Countdown targetDate={settings.startDate} />}
 
       {/* Blessing Counter */}
-      {settings.showBlessing && <BlessingCounter />}
+      {settings.showBlessing && <BlessingCounter currentUser={currentUser} />}
 
       {/* Message Board */}
       {settings.showMessageBoard && <MessageBoard settings={settings} currentUser={currentUser} />}

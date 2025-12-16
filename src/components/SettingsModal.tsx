@@ -193,7 +193,7 @@ export default function SettingsModal({ isOpen, onClose, settings, onSave }: Set
                             {[
                                 { key: 'showCountdown', label: '倒计时 / Countdown' },
                                 { key: 'showBlessing', label: '祝福 / Blessing' },
-                                { key: 'showMessageBoard', label: '留言板 / Messages' },
+                                { key: 'showMessageBoard', label: '对话 / Chat' },
                                 { key: 'showPhotoWall', label: '照片墙 / Photos' },
                                 { key: 'showMusicPlayer', label: '音乐 / Music' },
                                 { key: 'showMap', label: '地图 / Map' },

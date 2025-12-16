@@ -61,3 +61,23 @@ body {
     scrollbar-width: none; /* Firefox */
   }
 }
+
+@keyframes danmaku {
+  from {
+    left: 100%;
+    transform: translateX(0);
+  }
+  to {
+    left: 0;
+    transform: translateX(calc(-100% - 50px));
+  }
+}
+
+.animate-danmaku {
+  animation-name: danmaku;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+  position: absolute;
+  white-space: nowrap;
+  will-change: transform, left;
+}

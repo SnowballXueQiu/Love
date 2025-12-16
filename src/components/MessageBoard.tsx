@@ -81,7 +81,7 @@ export default function MessageBoard({ settings, currentUser }: MessageBoardProp
 
     return (
         <section className="memphis-card bg-memphis-yellow flex flex-col h-[60vh] max-h-[500px] w-full">
-            <h2 className="text-xl font-bold border-b-3 border-memphis-black pb-2 mb-4 text-center">留言板 💌</h2>
+            <h2 className="text-xl font-bold border-b-3 border-memphis-black pb-2 mb-4 text-center">碎碎念 💌</h2>
 
             <div 
                 ref={messagesContainerRef}
