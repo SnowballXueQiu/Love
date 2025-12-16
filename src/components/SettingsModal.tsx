@@ -38,7 +38,9 @@ export default function SettingsModal({ isOpen, onClose, settings, onSave }: Set
             .from('avatars')
             .upload(fileName, file);
         
-        if (error) throw error;
+        if (error) {
+            throw error
+        };
         
         const { data: { publicUrl } } = supabase.storage
             .from('avatars')

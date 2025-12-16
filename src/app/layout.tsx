@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import "./uno.css";
 import BackgroundShapes from "@/components/BackgroundShapes";
+import { StrictMode } from 'react';
 
 const arkPixel = localFont({
   src: "./fonts/ark-pixel-12px-proportional-zh_cn.ttf.woff",
@@ -25,8 +26,10 @@ export default function RootLayout({
       <body
         className={`${arkPixel.variable} font-sans min-h-screen flex flex-col items-center justify-center p-5`}
       >
-        <BackgroundShapes />
-        {children}
+        <StrictMode>
+          <BackgroundShapes />
+          {children}
+        </StrictMode>
       </body>
     </html>
   );

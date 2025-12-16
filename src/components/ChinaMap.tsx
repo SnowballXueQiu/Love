@@ -31,29 +31,22 @@ export default function ChinaMap({ currentUser }: ChinaMapProps) {
     const [isMapLoaded, setIsMapLoaded] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
+    const fetchVisited = async () => {
+        supabase.from('visited_places').select('name')
+        .then(({data}) => {
+            if (!data) {
+                return;
+            }
+            setVisitedPlaces(data.map(p => p.name));
+        })
+    };
+
     useEffect(() => {
-        // Fetch China Map GeoJSON
-        const fetchMapData = async () => {
-            try {
-                const response = await fetch('/china-map.json');
-                const mapJson = await response.json();
-                echarts.registerMap('china', mapJson);
-                setIsMapLoaded(true);
-            } catch (error) {
-                console.error("Failed to load map data:", error);
-            }
-        };
-
-        fetchMapData();
-
-        // Fetch visited places from DB
-        const fetchVisited = async () => {
-            const { data } = await supabase.from('visited_places').select('name');
-            if (data) {
-                setVisitedPlaces(data.map(p => p.name));
-            }
-        };
-
+        fetch('/china-map.json')
+            .then(resp => resp.json())
+            .then(map => echarts.registerMap('china', map))
+            .then(() => setIsMapLoaded(true))
+            .catch(reason => console.error("Failed to load map data:", reason))
         fetchVisited();
 
         // Realtime subscription
