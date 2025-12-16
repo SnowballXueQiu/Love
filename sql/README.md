@@ -52,7 +52,16 @@
     - `Enable delete for authenticated users only`: 仅允许登录的管理员删除弹幕。
 - 启用 Realtime 功能，实现弹幕实时推送。
 
-### 7. `99_legacy_supabase_schema.sql` (旧版/备份)
+### 7. `06_optimize_blessings.sql` (祝福计数优化)
+**用途**: 将祝福计数从"每点击一次插入一行"优化为"单行计数器"。
+**包含内容**:
+- 创建 `blessing_stats` 表：仅包含一行数据，存储总祝福数。
+- 迁移旧数据：将 `blessings` 表的行数统计并迁移到新表。
+- 创建 `increment_blessing` RPC 函数：用于原子性地增加计数。
+- 启用 Realtime 功能，监听 `UPDATE` 事件。
+- 删除旧的 `blessings` 表。
+
+### 8. `99_legacy_supabase_schema.sql` (旧版/备份)
 **用途**: 项目早期的 Schema 备份文件。
 **说明**: 包含了一些早期的表定义和默认数据插入语句。主要作为参考保留，建议使用 `00_schema_setup.sql` 进行初始化。
 

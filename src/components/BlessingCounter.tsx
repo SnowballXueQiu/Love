@@ -75,12 +75,14 @@ export default function BlessingCounter({ currentUser }: BlessingCounterProps) {
     useEffect(() => {
         // Fetch initial count
         const fetchCount = async () => {
-            const { count } = await supabase
-                .from('blessings')
-                .select('*', { count: 'exact', head: true });
+            const { data } = await supabase
+                .from('blessing_stats')
+                .select('count')
+                .eq('id', 1)
+                .single();
             
-            if (count !== null) {
-                setCount(count);
+            if (data) {
+                setCount(data.count);
             }
         };
 
@@ -107,8 +109,8 @@ export default function BlessingCounter({ currentUser }: BlessingCounterProps) {
         // Subscribe to changes
         const channel = supabase
             .channel('blessings_and_messages')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'blessings' }, () => {
-                setCount(prev => prev + 1);
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'blessing_stats' }, (payload) => {
+                setCount(payload.new.count);
             })
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'public_messages' }, (payload) => {
                 const newMsg = payload.new as PublicMessage;
@@ -172,9 +174,7 @@ export default function BlessingCounter({ currentUser }: BlessingCounterProps) {
         setHasBlessed(true);
 
         try {
-            const { error } = await supabase
-                .from('blessings')
-                .insert([{}]); // Insert empty row, assuming id and created_at are auto-generated
+            const { error } = await supabase.rpc('increment_blessing');
 
             if (error) throw error;
         } catch (err) {
