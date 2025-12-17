@@ -4,6 +4,7 @@ import "./globals.css";
 import "./uno.css";
 import BackgroundShapes from "@/components/BackgroundShapes";
 import { StrictMode } from 'react';
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const arkPixel = localFont({
   src: "./fonts/ark-pixel-12px-proportional-zh_cn.ttf.woff",
@@ -32,6 +33,7 @@ export default function RootLayout({
         <StrictMode>
           <BackgroundShapes />
           {children}
+          <SpeedInsights />
         </StrictMode>
       </body>
     </html>
