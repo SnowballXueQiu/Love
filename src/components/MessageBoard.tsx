@@ -11,6 +11,7 @@ interface MessageBoardProps {
 export default function MessageBoard({ settings, currentUser }: MessageBoardProps) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState("");
+    const [isSending, setIsSending] = useState(false);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = () => {
@@ -59,23 +60,30 @@ export default function MessageBoard({ settings, currentUser }: MessageBoardProp
     }, []);
 
     const handleSendMessage = async () => {
-        if (!newMessage.trim()) return;
+        if (!newMessage.trim() || isSending) return;
         
-        const msgPayload = {
-            text: newMessage,
-            date: new Date().toISOString(),
-            sender: currentUser || undefined,
-        };
+        setIsSending(true);
+        try {
+            const msgPayload = {
+                text: newMessage,
+                date: new Date().toISOString(),
+                sender: currentUser || undefined,
+            };
 
-        const { data, error } = await supabase
-            .from('messages')
-            .insert([msgPayload])
-            .select()
-            .single();
+            const { data, error } = await supabase
+                .from('messages')
+                .insert([msgPayload])
+                .select()
+                .single();
 
-        if (data) {
-            setMessages((prev) => [...prev, data as Message]);
-            setNewMessage("");
+            if (data) {
+                setMessages((prev) => [...prev, data as Message]);
+                setNewMessage("");
+            }
+        } catch (error) {
+            console.error("Error sending message:", error);
+        } finally {
+            setIsSending(false);
         }
     };
 
@@ -132,10 +140,15 @@ export default function MessageBoard({ settings, currentUser }: MessageBoardProp
                         onChange={(e) => setNewMessage(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                         placeholder={`作为 ${currentUser === 'name1' ? settings.name1 : settings.name2} 发言...`}
-                        className="memphis-input flex-1 min-w-0"
+                        className="memphis-input flex-1 min-w-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={isSending}
                     />
-                    <button onClick={handleSendMessage} className="memphis-btn bg-memphis-white px-4 whitespace-nowrap shrink-0">
-                        发送
+                    <button 
+                        onClick={handleSendMessage} 
+                        className="memphis-btn bg-memphis-white px-4 whitespace-nowrap shrink-0"
+                        disabled={isSending}
+                    >
+                        {isSending ? '发送中...' : '发送'}
                     </button>
                 </div>
             )}
