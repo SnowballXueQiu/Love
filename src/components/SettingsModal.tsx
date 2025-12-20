@@ -199,6 +199,7 @@ export default function SettingsModal({ isOpen, onClose, settings, onSave }: Set
                                 { key: 'showPhotoWall', label: '照片墙 / Photos' },
                                 { key: 'showMusicPlayer', label: '音乐 / Music' },
                                 { key: 'showMap', label: '地图 / Map' },
+                                { key: 'showMilestones', label: '成就墙 / Achievements' },
                             ].map(({ key, label }) => (
                                 <label key={key} className="flex items-center gap-2 cursor-pointer select-none">
                                     <div className="relative">

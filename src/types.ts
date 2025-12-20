@@ -16,6 +16,7 @@ export interface AppSettings {
     showPhotoWall?: boolean;
     showMusicPlayer?: boolean;
     showMap?: boolean;
+    showMilestones?: boolean;
 }
 
 export interface Message {
