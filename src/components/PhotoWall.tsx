@@ -426,6 +426,7 @@ export default function PhotoWall({ settings, currentUser }: PhotoWallProps) {
                 onClick={(e) => {
                     if (e.target === dialogRef.current) handleClosePreview();
                 }}
+                onCancel={handleClosePreview}
             >
                 {selectedPost && (
                     <div className="relative flex flex-col items-center">
