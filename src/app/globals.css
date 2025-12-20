@@ -81,3 +81,19 @@ body {
   white-space: nowrap;
   will-change: transform, left;
 }
+
+@keyframes marquee-scroll {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-marquee-scroll {
+  animation: marquee-scroll linear infinite;
+  min-width: 100%;
+  will-change: transform;
+}
+

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { AppSettings } from "@/types";
 import { supabase } from "@/lib/supabase";
 
@@ -28,6 +28,48 @@ const ICON_CATEGORIES = [
     { name: "动物", icons: ["🐱", "🐶", "🐰", "🐼", "🦊", "🦁", "🦄", "🦋", "🐯", "🐮", "🐷", "🐸", "🐙", "🐬"] },
     { name: "运动", icons: ["⚽", "🏀", "🎾", "🏊", "🚴", "🧘", "🏋️", "🏃", "🏸", "🏓", "🥊", "⛳", "⛸️"] },
 ];
+
+const MarqueeText = ({ text }: { text: string }) => {
+    const [isOverflowing, setIsOverflowing] = useState(false);
+    const textRef = useRef<HTMLDivElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const checkOverflow = () => {
+            if (textRef.current && containerRef.current) {
+                // Reset width to auto to get true scrollWidth
+                if (textRef.current.style.width === '100%') {
+                     textRef.current.style.width = 'auto';
+                }
+                const isOverflow = textRef.current.scrollWidth > containerRef.current.clientWidth;
+                setIsOverflowing(isOverflow);
+            }
+        };
+
+        checkOverflow();
+        // Double check after a short delay for layout stability
+        const timer = setTimeout(checkOverflow, 100);
+
+        window.addEventListener('resize', checkOverflow);
+        return () => {
+            window.removeEventListener('resize', checkOverflow);
+            clearTimeout(timer);
+        };
+    }, [text]);
+
+    return (
+        <div ref={containerRef} className="w-full overflow-hidden px-1 relative h-[1.2em] flex items-center justify-center">
+            <div 
+                ref={textRef}
+                className={`font-bold text-xs whitespace-nowrap inline-block ${isOverflowing ? 'animate-marquee-scroll' : 'w-full text-center'}`}
+                style={isOverflowing ? { animationDuration: `${Math.max(5, text.length * 0.5)}s` } : {}}
+                title={text}
+            >
+                {text}
+            </div>
+        </div>
+    );
+};
 
 export default function Achievements({ settings, currentUser }: AchievementsProps) {
     const [achievements, setAchievements] = useState<Achievement[]>([]);
@@ -187,8 +229,8 @@ export default function Achievements({ settings, currentUser }: AchievementsProp
                     achievements.map((item) => (
                         <div key={item.id} className="relative bg-white text-black border-3 border-memphis-black shadow-[4px_4px_0_#232323] p-2 rounded flex flex-col items-center justify-center gap-1 aspect-square hover:-translate-y-1 hover:shadow-[6px_6px_0_#232323] transition-all group">
                             <div className="text-3xl mb-1">{item.icon}</div>
-                            <div className="font-bold text-xs text-center line-clamp-2 leading-tight w-full px-1">{item.title}</div>
-                            <div className="text-[10px] opacity-60 font-mono bg-gray-100 px-1 rounded">{item.date}</div>
+                            <MarqueeText text={item.title} />
+                            <div className="text-[9px] opacity-60 font-mono bg-gray-100 px-1 rounded">{item.date.slice(2).replace(/-/g, '/')}</div>
                             
                             {currentUser && (
                                 <button 
