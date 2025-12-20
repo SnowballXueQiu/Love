@@ -13,7 +13,7 @@ const PhotoWall = lazy(()=>import("@/components/PhotoWall"));
 const SettingsModal = lazy(()=>import("@/components/SettingsModal"));
 const MusicPlayer = lazy(()=>import("@/components/MusicPlayer"));
 const ChinaMap = lazy(()=>import("@/components/ChinaMap"));
-const Milestones = lazy(()=>import("@/components/Milestones"));
+const Achievements = lazy(()=>import("@/components/Achievements"));
 
 const defaultSettings: AppSettings = {
   name1: "Name1",
@@ -30,7 +30,7 @@ const defaultSettings: AppSettings = {
   showPhotoWall: true,
   showMusicPlayer: true,
   showMap: true,
-  showMilestones: true,
+  showAchievements: true,
 };
 
 export default function Home() {
@@ -98,7 +98,7 @@ export default function Home() {
           showPhotoWall: data.show_photo_wall ?? true,
           showMusicPlayer: data.show_music_player ?? true,
           showMap: data.show_map ?? true,
-          showMilestones: data.show_milestones ?? true,
+          showAchievements: data.show_milestones ?? true,
       });
       setLoading(false);
     };
@@ -126,7 +126,7 @@ export default function Home() {
               show_photo_wall: newSettings.showPhotoWall,
               show_music_player: newSettings.showMusicPlayer,
               show_map: newSettings.showMap,
-              show_milestones: newSettings.showMilestones
+              show_milestones: newSettings.showAchievements
           }).eq('id', newSettings.id);
       } else {
           // Insert new row if no ID exists
@@ -145,7 +145,7 @@ export default function Home() {
               show_photo_wall: newSettings.showPhotoWall,
               show_music_player: newSettings.showMusicPlayer,
               show_map: newSettings.showMap,
-              show_milestones: newSettings.showMilestones
+              show_milestones: newSettings.showAchievements
           }]).select().single();
 
           if (error) {
@@ -306,7 +306,7 @@ export default function Home() {
       {settings.showBlessing && <BlessingCounter currentUser={currentUser} />}
 
       {/* Achievements */}
-      {settings.showMilestones && <Milestones settings={settings} currentUser={currentUser} />}
+      {settings.showAchievements && <Achievements settings={settings} currentUser={currentUser} />}
 
       {/* Message Board */}
       {settings.showMessageBoard && <MessageBoard settings={settings} currentUser={currentUser} />}

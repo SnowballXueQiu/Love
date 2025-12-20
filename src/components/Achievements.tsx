@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { AppSettings } from "@/types";
 import { supabase } from "@/lib/supabase";
 
-interface MilestonesProps {
+interface AchievementsProps {
     settings: AppSettings;
     currentUser: "name1" | "name2" | null;
 }
@@ -29,7 +29,7 @@ const ICON_CATEGORIES = [
     { name: "运动", icons: ["⚽", "🏀", "🎾", "🏊", "🚴", "🧘", "🏋️", "🏃", "🏸", "🏓", "🥊", "⛳", "⛸️"] },
 ];
 
-export default function Milestones({ settings, currentUser }: MilestonesProps) {
+export default function Achievements({ settings, currentUser }: AchievementsProps) {
     const [achievements, setAchievements] = useState<Achievement[]>([]);
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [newTitle, setNewTitle] = useState("");
