@@ -234,7 +234,7 @@ export default function Achievements({ settings, currentUser }: AchievementsProp
                             
                             {currentUser && (
                                 <button 
-                                    onClick={(e) => {
+                                    onClick={(e) => {                               
                                         e.stopPropagation();
                                         handleDelete(item.id);
                                     }}
